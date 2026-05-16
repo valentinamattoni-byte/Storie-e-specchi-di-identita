@@ -3,26 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Explosion Book - 4 quadrati + 12 triangoli</title>
+  <title>Explosion Book - presentazione interattiva</title>
   <style>
     * { box-sizing: border-box; }
 
-    body {
-  margin: 0;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: Georgia, serif;
-  overflow: hidden;
-  position: relative;
+    :root {
+      --s: min(14vw, 130px);
+      --paper-border: rgba(55, 35, 28, .82);
+    }
 
-  background-image: url('sfondo muro v.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-color: #efd8cf;
-}
+    html, body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Georgia, serif;
+      overflow: hidden;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background-color: #efd8cf;
+      background-image: url('sfondo muro v.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
 
     .scene {
       width: min(96vw, 1200px);
@@ -31,20 +38,23 @@
       align-items: center;
       justify-content: center;
       perspective: 1800px;
+      position: relative;
+      z-index: 20;
     }
 
     .book {
-      --s: min(14vw, 130px);
       width: calc(var(--s) * 6.2);
       height: calc(var(--s) * 6.2);
       position: relative;
       transform-style: preserve-3d;
       cursor: pointer;
-      transition: transform 1s ease;
+      transition: transform .85s ease, opacity .35s ease, filter .35s ease;
+      will-change: transform, opacity, filter;
+      z-index: 30;
     }
 
     .book.open {
-      transform: scale(1.08) rotateX(4deg) rotateZ(-2deg) translateX(-2vw);
+      transform: scale(1.06) rotateX(3deg) rotateZ(-2deg) translateX(-2vw);
     }
 
     .square,
@@ -57,14 +67,13 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 10px;
-      border: 3px solid rgba(55,35,28,.82);
+      padding: 0;
+      border: 3px solid var(--paper-border);
       box-shadow: 0 12px 24px rgba(0,0,0,.16);
       backface-visibility: hidden;
-      transition:
-        transform 1.15s cubic-bezier(.2,.75,.15,1),
-        opacity .45s ease;
       overflow: hidden;
+      transition: transform .95s cubic-bezier(.2,.75,.15,1), opacity .35s ease;
+      will-change: transform, opacity;
     }
 
     .square::after,
@@ -73,17 +82,9 @@
       content: "";
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,.42), rgba(0,0,0,.05));
+      background: linear-gradient(135deg, rgba(255,255,255,.24), rgba(0,0,0,.06));
       pointer-events: none;
-    }
-
-    .square span,
-    .triangle span,
-    .cover strong {
-      position: relative;
-      z-index: 2;
-      font-weight: 700;
-      line-height: 1.08;
+      z-index: 4;
     }
 
     .square img {
@@ -101,13 +102,7 @@
 
     .has-slide,
     .has-slide-small {
-      background: #ffffff !important;
-      overflow: hidden;
-      padding: 0;
-    }
-
-    .has-slide {
-      background: #ffffff !important;
+      background: white !important;
       overflow: hidden;
       padding: 0;
     }
@@ -117,51 +112,16 @@
       box-shadow: 0 6px 16px rgba(0,0,0,.18);
     }
 
-    .has-slide img {
-      box-shadow: 0 6px 16px rgba(0,0,0,.18);
-    }
-
-    /*
-      La slide 16:9 dentro un quadrato si vede intera ma piccola.
-      Quando l'explosion book è aperto, il quadrato centrale si ingrandisce
-      per rendere leggibile la slide senza tagliarla.
-    */
     .book.open .has-slide {
-      transform: translate(0,0) rotateX(0) rotateY(0) scale(1.15);
+      transform: translate(0,0) rotateX(0) rotateY(0) scale(1.12);
       z-index: 35;
     }
-
-    /*
-      Adattamento migliore per immagini verticali o fotografie di slide.
-      L'immagine sfrutta più spazio interno senza deformarsi.
-    */
-    .has-slide img {
-      max-width: 100%;
-      max-height: 100%;
-      transform: scale(1.02);
-      transform-origin: center;
-    }
-
-    /*
-      GEOMETRIA:
-      4 quadrati principali in diagonale.
-      Ogni quadrato tocca il successivo solo per un angolo.
-
-      q1
-         q2
-            q3
-               q4
-
-      I 12 triangoli sono organizzati in 6 coppie.
-      Ogni coppia di triangoli colma uno spazio vuoto e forma visivamente un nuovo quadrato.
-    */
 
     .q1 { left: calc(var(--s) * 0.6); top: calc(var(--s) * 0.6); background: #ffe29a; z-index: 20; }
     .q2 { left: calc(var(--s) * 1.6); top: calc(var(--s) * 1.6); background: #d8f0ff; z-index: 22; }
     .q3 { left: calc(var(--s) * 2.6); top: calc(var(--s) * 2.6); background: #f5b7aa; z-index: 24; }
     .q4 { left: calc(var(--s) * 3.6); top: calc(var(--s) * 3.6); background: #d9f4df; z-index: 26; }
 
-    /* Stato chiuso: tutti ripiegati sul quadrato q3, come un artefatto chiuso */
     .q1 { transform-origin: 100% 100%; transform: translate(calc(var(--s) * 2), calc(var(--s) * 2)) rotateX(-130deg) rotateY(35deg); }
     .q2 { transform-origin: 100% 100%; transform: translate(var(--s), var(--s)) rotateX(-120deg) rotateY(25deg); }
     .q3 { transform: translate(0,0); }
@@ -175,85 +135,33 @@
     }
 
     .triangle {
-      background: rgba(255,248,237,0.88);
+      background: rgba(255,248,237,.9);
       opacity: 0;
-      font-size: 12px;
       z-index: 18;
-      border: 1.5px solid rgba(70, 45, 35, .55);
+      border: 1.5px solid rgba(70, 45, 35, .58);
     }
 
-    /*
-      Linea di piega/diagonale: rende leggibile che ogni quadrato intermedio
-      è composto da due triangoli distinti.
-    */
     .triangle::before {
       content: "";
       position: absolute;
       inset: 0;
       background: linear-gradient(135deg,
-        transparent calc(50% - 0.5px),
-        rgba(70, 45, 35, .38) calc(50% - 0.5px),
-        rgba(70, 45, 35, .38) calc(50% + 0.5px),
-        transparent calc(50% + 0.5px)
+        transparent calc(50% - .5px),
+        rgba(70,45,35,.34) calc(50% - .5px),
+        rgba(70,45,35,.34) calc(50% + .5px),
+        transparent calc(50% + .5px)
       );
-      z-index: 1;
+      z-index: 5;
       pointer-events: none;
     }
 
-    .book.open .triangle {
-      opacity: 1;
-    }
+    .book.open .triangle { opacity: 1; }
 
-    /*
-      Evidenzia meglio i triangoli sopra le slide.
-    */
     .triangle span {
-      font-size: 11px;
-      color: #5a3425;
-      font-weight: bold;
-    }
-
-    /*
-      Mini-slide nei triangoli: le immagini vengono incollate dentro il frame
-      triangolare e ritagliate dal clip-path del triangolo.
-    */
-    .triangle.has-triangle-slide {
-      background: #ffffff;
-      padding: 0;
-      overflow: hidden;
-    }
-
-    .triangle.has-triangle-slide img {
-      position: absolute;
-      inset: -14%;
-      width: 128%;
-      height: 128%;
-      object-fit: cover;
-      object-position: center;
-      display: block;
-      z-index: 0;
-      filter: saturate(1.05) contrast(1.03);
-    }
-
-    .triangle.has-triangle-slide::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        linear-gradient(135deg, rgba(255,255,255,.18), rgba(0,0,0,.10));
-      z-index: 1;
-      pointer-events: none;
-    }
-
-    .triangle.has-triangle-slide::before {
-      z-index: 2;
-    }
-
-    .triangle.has-triangle-slide span {
       position: absolute;
       left: 6px;
       bottom: 6px;
-      z-index: 3;
+      z-index: 6;
       min-width: 22px;
       height: 22px;
       display: inline-flex;
@@ -261,46 +169,45 @@
       justify-content: center;
       padding: 0 6px;
       border-radius: 999px;
-      color: #ffffff;
-      background: rgba(55,35,28,.72);
-      box-shadow: 0 3px 8px rgba(0,0,0,.22);
+      color: white;
+      background: rgba(55,35,28,.74);
+      box-shadow: 0 3px 8px rgba(0,0,0,.24);
       font-size: 10px;
+      font-weight: bold;
     }
 
+    .triangle.has-triangle-slide {
+      background: white;
+      overflow: hidden;
+    }
 
-    /*
-      COPPIE DI TRIANGOLI.
-      Ogni coppia occupa una cella-quadrato lasciata vuota dalla diagonale.
-      Le due metà sono divise dalla diagonale della cella.
-    */
+    .triangle.has-triangle-slide img {
+      position: absolute;
+      inset: -18%;
+      width: 136%;
+      height: 136%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+      z-index: 2;
+      filter: saturate(1.05) contrast(1.03);
+    }
 
-    /* coppia 1: sopra-destra di q1 */
+    /* triangoli: coppie che formano i quadrati vuoti */
     .t1  { left: calc(var(--s) * 1.6); top: calc(var(--s) * 0.6); clip-path: polygon(0 0, 100% 0, 0 100%); transform-origin: 0 100%; transform: translate(var(--s), var(--s)) rotateX(-110deg); }
     .t2  { left: calc(var(--s) * 1.6); top: calc(var(--s) * 0.6); clip-path: polygon(100% 0, 100% 100%, 0 100%); transform-origin: 100% 0; transform: translate(var(--s), var(--s)) rotateY(-110deg); }
-
-    /* coppia 2: sotto-sinistra di q2 */
     .t3  { left: calc(var(--s) * 0.6); top: calc(var(--s) * 1.6); clip-path: polygon(0 0, 100% 0, 0 100%); transform-origin: 0 100%; transform: translate(var(--s), var(--s)) rotateY(110deg); }
     .t4  { left: calc(var(--s) * 0.6); top: calc(var(--s) * 1.6); clip-path: polygon(100% 0, 100% 100%, 0 100%); transform-origin: 100% 0; transform: translate(var(--s), var(--s)) rotateX(-110deg); }
-
-    /* coppia 3: sopra-destra di q2 */
     .t5  { left: calc(var(--s) * 2.6); top: calc(var(--s) * 1.6); clip-path: polygon(0 0, 100% 0, 0 100%); transform-origin: 0 100%; transform: translate(0,0) rotateX(-110deg); }
     .t6  { left: calc(var(--s) * 2.6); top: calc(var(--s) * 1.6); clip-path: polygon(100% 0, 100% 100%, 0 100%); transform-origin: 100% 0; transform: translate(0,0) rotateY(-110deg); }
-
-    /* coppia 4: sotto-sinistra di q3 */
     .t7  { left: calc(var(--s) * 1.6); top: calc(var(--s) * 2.6); clip-path: polygon(0 0, 100% 0, 0 100%); transform-origin: 0 100%; transform: translate(0,0) rotateY(110deg); }
     .t8  { left: calc(var(--s) * 1.6); top: calc(var(--s) * 2.6); clip-path: polygon(100% 0, 100% 100%, 0 100%); transform-origin: 100% 0; transform: translate(0,0) rotateX(110deg); }
-
-    /* coppia 5: sopra-destra di q3 */
     .t9  { left: calc(var(--s) * 3.6); top: calc(var(--s) * 2.6); clip-path: polygon(0 0, 100% 0, 0 100%); transform-origin: 0 100%; transform: translate(calc(var(--s) * -1), calc(var(--s) * -1)) rotateX(110deg); }
     .t10 { left: calc(var(--s) * 3.6); top: calc(var(--s) * 2.6); clip-path: polygon(100% 0, 100% 100%, 0 100%); transform-origin: 100% 0; transform: translate(calc(var(--s) * -1), calc(var(--s) * -1)) rotateY(-110deg); }
-
-    /* coppia 6: sotto-sinistra di q4 */
     .t11 { left: calc(var(--s) * 2.6); top: calc(var(--s) * 3.6); clip-path: polygon(0 0, 100% 0, 0 100%); transform-origin: 0 100%; transform: translate(calc(var(--s) * -1), calc(var(--s) * -1)) rotateY(110deg); }
     .t12 { left: calc(var(--s) * 2.6); top: calc(var(--s) * 3.6); clip-path: polygon(100% 0, 100% 100%, 0 100%); transform-origin: 100% 0; transform: translate(calc(var(--s) * -1), calc(var(--s) * -1)) rotateX(110deg); }
 
-    .book.open .triangle {
-      transform: translate(0,0) rotateX(0) rotateY(0);
-    }
+    .book.open .triangle { transform: translate(0,0) rotateX(0) rotateY(0); }
 
     .cover {
       left: calc(var(--s) * 3);
@@ -315,7 +222,10 @@
     }
 
     .cover strong {
+      position: relative;
+      z-index: 6;
       font-size: 17px;
+      line-height: 1.05;
       text-transform: uppercase;
     }
 
@@ -325,27 +235,16 @@
       pointer-events: none;
     }
 
-    /*
-      Stato chiuso pulito: si vede SOLO il quadrato di copertina.
-      Tutti gli altri elementi compaiono solo quando l'explosion book si apre.
-    */
     .book:not(.open) .square,
     .book:not(.open) .triangle {
       opacity: 0;
       pointer-events: none;
     }
 
-    .book.open .square {
-      opacity: 1;
-    }
+    .book.open .square { opacity: 1; }
 
-    .clickable-piece {
-      cursor: pointer;
-    }
-
-    .clickable-piece:hover {
-      filter: brightness(1.08);
-    }
+    .clickable-piece { cursor: pointer; }
+    .clickable-piece:hover { filter: brightness(1.08); }
 
     .slide-viewer {
       position: fixed;
@@ -357,7 +256,7 @@
       opacity: 0;
       pointer-events: none;
       z-index: 9999;
-      transition: opacity .35s ease;
+      transition: opacity .25s ease;
     }
 
     .slide-viewer.visible {
@@ -386,13 +285,9 @@
       background: rgba(255,255,255,.88);
       font-weight: bold;
       box-shadow: 0 8px 22px rgba(0,0,0,.16);
+      z-index: 10001;
     }
 
-    /*
-      Quadrati ornamentali sullo sfondo.
-      Non sono interattivi: servono solo a dare
-      più presenza visiva all'explosion book.
-    */
     .decor-square {
       position: fixed;
       width: 140px;
@@ -403,97 +298,31 @@
       background-position: center !important;
       background-repeat: no-repeat !important;
       transform: rotate(45deg);
-      box-shadow:
-        0 18px 38px rgba(0,0,0,.16),
-        inset 0 0 0 2px rgba(255,255,255,.28);
+      box-shadow: 0 18px 38px rgba(0,0,0,.16), inset 0 0 0 2px rgba(255,255,255,.28);
       pointer-events: none;
       z-index: 120;
+      transition: opacity .25s ease, filter .25s ease, z-index .25s ease;
+      will-change: opacity, filter;
     }
 
-    .decor1 {
-      top: 8%;
-      left: 6%;
-      background-image: url('carta vi.jpg');
-      background-size: cover;
-      background-position: center;
-    }
+    .decor1 { top: 8%; left: 6%; background-image: url('carta vi.jpg'); }
+    .decor2 { bottom: 7%; right: 3%; width: 220px; height: 220px; opacity: .92; background-image: url('carta az.jpg'); }
+    .decor3 { top: 30%; right: 24%; width: 110px; height: 110px; opacity: .82; background-image: url('carta bs.jpg'); }
+    .decor4 { bottom: 16%; left: 18%; width: 135px; height: 135px; opacity: .78; background-image: url('carta ar.jpg'); }
+    .decor5 { top: 42%; left: 10%; width: 95px; height: 95px; opacity: .74; background-image: url('carta ve.jpg'); }
+    .decor6 { top: 5%; right: 12%; width: 155px; height: 155px; opacity: .8; background-image: url('carta ve c.jpg'); }
 
-    .decor2 {
-      bottom: 7%;
-      right: 3%;
-      width: 220px;
-      height: 220px;
-      opacity: .92;
-      background-image: url('carta az.jpg');
-      background-size: cover;
-      background-position: center;
-    }
-
-    .decor3 {
-      top: 30%;
-      right: 24%;
-      width: 110px;
-      height: 110px;
-      opacity: .82;
-      background-image: url('carta bs.jpg');
-      background-size: cover;
-      background-position: center;
-    }
-
-    .decor4 {
-      bottom: 16%;
-      left: 18%;
-      width: 135px;
-      height: 135px;
-      opacity: .78;
-      background-image: url('carta ar.jpg');
-      background-size: cover;
-      background-position: center;
-    }
-
-    .decor5 {
-      top: 42%;
-      left: 10%;
-      width: 95px;
-      height: 95px;
-      opacity: .74;
-      background-image: url('carta ve.jpg');
-      background-size: cover;
-      background-position: center;
-    }
-
-    .decor6 {
-      top: 5%;
-      right: 12%;
-      width: 155px;
-      height: 155px;
-      opacity: .8;
-      background-image: url('carta ve c.jpg');
-      background-size: cover;
-      background-position: center;
-    }
-
-
-    /*
-      Quando una slide è aperta, i quadrati ornamentali e l'explosion book
-      passano visivamente in secondo piano. Le copertine restano intatte:
-      cambia solo il livello/trasparenza durante la visualizzazione della slide.
-    */
     body.slide-open .decor-square {
       z-index: 5;
-      opacity: .28;
-      filter: blur(1px) brightness(.75);
+      opacity: .24;
+      filter: blur(.7px) brightness(.75);
     }
 
     body.slide-open .book {
       z-index: 10;
-      opacity: .28;
-      filter: brightness(.75);
+      opacity: .24;
+      filter: brightness(.72);
       pointer-events: none;
-    }
-
-    body.slide-open .slide-viewer {
-      z-index: 9999;
     }
 
     .hint {
@@ -506,12 +335,13 @@
       border-radius: 999px;
       box-shadow: 0 8px 22px rgba(0,0,0,.13);
       font-size: 14px;
+      z-index: 300;
     }
 
     @media (max-width: 760px) {
-      .book { --s: 105px; }
-      .square span, .triangle span { font-size: 9px; }
+      :root { --s: 92px; }
       .cover strong { font-size: 12px; }
+      .triangle span { font-size: 9px; min-width: 18px; height: 18px; }
     }
   </style>
 </head>
@@ -527,38 +357,21 @@
     <section class="book" id="book" aria-label="Explosion book interattivo: quattro quadrati e dodici triangoli">
       <div class="cover"><strong>Storie<br>uniche</strong></div>
 
-      <div class="square q1 has-slide-small clickable-piece" data-slide="1">
-        <img src="slide1.jpg" alt="Slide 1" />
-      </div>
+      <div class="square q1 has-slide-small clickable-piece" data-slide="1"><img src="slide1.jpg" alt="Slide 1" decoding="async" /></div>
+      <div class="square q2 has-slide-small clickable-piece" data-slide="2"><img src="slide2.jpg" alt="Slide 2" decoding="async" /></div>
+      <div class="square q3 has-slide clickable-piece" data-slide="3"><img src="slide3.jpg" alt="Slide 3" decoding="async" /></div>
+      <div class="square q4 has-slide-small clickable-piece" data-slide="4"><img src="slide4.jpg" alt="Slide 4" decoding="async" /></div>
 
-      <div class="square q2 has-slide-small clickable-piece" data-slide="2">
-        <img src="slide2.jpg" alt="Slide 2" />
-      </div>
-
-      <div class="square q3 has-slide clickable-piece" data-slide="3">
-        <img src="slide3.jpg" alt="Slide 3" />
-      </div>
-
-      <div class="square q4 has-slide-small clickable-piece" data-slide="4">
-        <img src="slide4.jpg" alt="Slide 4" />
-      </div>
-
-      <div class="triangle t1 has-triangle-slide clickable-piece" data-slide="6"><img src="slide6.jpg" alt="Slide 6" /><span>6</span></div>
-      <div class="triangle t2 has-triangle-slide clickable-piece" data-slide="8"><img src="slide8.jpg" alt="Slide 8" /><span>8</span></div>
-
-      <div class="triangle t3 has-triangle-slide clickable-piece" data-slide="5"><img src="slide5.jpg" alt="Slide 5" /><span>5</span></div>
-      <div class="triangle t4 has-triangle-slide clickable-piece" data-slide="7"><img src="slide7.jpg" alt="Slide 7" /><span>7</span></div>
-
-      <div class="triangle t5 clickable-piece" data-slide="10"><span>10</span></div>
+      <div class="triangle t1 has-triangle-slide clickable-piece" data-slide="6"><img src="slide6.jpg" alt="Slide 6" decoding="async" /><span>6</span></div>
+      <div class="triangle t2 has-triangle-slide clickable-piece" data-slide="8"><img src="slide8.jpg" alt="Slide 8" decoding="async" /><span>8</span></div>
+      <div class="triangle t3 has-triangle-slide clickable-piece" data-slide="5"><img src="slide5.jpg" alt="Slide 5" decoding="async" /><span>5</span></div>
+      <div class="triangle t4 has-triangle-slide clickable-piece" data-slide="7"><img src="slide7.jpg" alt="Slide 7" decoding="async" /><span>7</span></div>
+      <div class="triangle t5 has-triangle-slide clickable-piece" data-slide="10"><img src="slide10.jpg" alt="Slide 10" decoding="async" /><span>10</span></div>
       <div class="triangle t6"><span></span></div>
-
-      <div class="triangle t7 clickable-piece" data-slide="9"><span>9</span></div>
-
+      <div class="triangle t7 has-triangle-slide clickable-piece" data-slide="9"><img src="slide9.jpg" alt="Slide 9" decoding="async" /><span>9</span></div>
       <div class="triangle t8"><span></span></div>
-
       <div class="triangle t9"><span></span></div>
       <div class="triangle t10"><span></span></div>
-
       <div class="triangle t11"><span></span></div>
       <div class="triangle t12"><span></span></div>
     </section>
@@ -569,7 +382,7 @@
     </div>
   </main>
 
-  <div class="hint">Clicca per aprire/chiudere l’explosion book</div>
+  <div class="hint">Clicca per aprire l’explosion book · clicca la slide grande per chiuderla</div>
 
   <script>
     const book = document.getElementById('book');
@@ -579,26 +392,27 @@
     const pieces = document.querySelectorAll('.clickable-piece');
 
     const slides = [
-      'slide1.jpg',
-      'slide2.jpg',
-      'slide3.jpg',
-      'slide4.jpg',
-      'slide5.jpg',
-      'slide6.jpg',
-      'slide7.jpg',
-      'slide8.jpg',
-      'slide9.jpg',
-      'slide10.jpg'
+      'slide1.jpg', 'slide2.jpg', 'slide3.jpg', 'slide4.jpg', 'slide5.jpg',
+      'slide6.jpg', 'slide7.jpg', 'slide8.jpg', 'slide9.jpg', 'slide10.jpg'
     ];
 
     let lastOpenedSlide = 0;
 
+    function preloadSlides() {
+      slides.forEach(src => {
+        const img = new Image();
+        img.src = src;
+      });
+    }
+
     function openBook() {
       book.classList.add('open');
+      preloadSlides();
     }
 
     function closeBook() {
       viewer.classList.remove('visible');
+      document.body.classList.remove('slide-open');
       book.classList.remove('open');
       lastOpenedSlide = 0;
     }
@@ -609,6 +423,7 @@
 
       lastOpenedSlide = n;
       viewerImage.src = slides[index];
+      viewerImage.alt = `Slide ${n}`;
       viewerLabel.textContent = `Slide ${n}`;
       document.body.classList.add('slide-open');
       viewer.classList.add('visible');
@@ -622,36 +437,23 @@
       }
     }
 
-    /*
-      Primo click sulla copertina: apre l'explosion book.
-      Poi il libro resta aperto.
-    */
-    book.addEventListener('click', (e) => {
-      if (!book.classList.contains('open')) {
-        openBook();
-      }
+    book.addEventListener('click', () => {
+      if (!book.classList.contains('open')) openBook();
     });
 
-    /*
-      Cliccando sui 4 quadrati e sui 6 triangoli assegnati,
-      si visualizzano le slide dalla 1 alla 10.
-    */
     pieces.forEach(piece => {
       piece.addEventListener('click', (e) => {
         e.stopPropagation();
         if (!book.classList.contains('open')) openBook();
-        const n = Number(piece.dataset.slide);
-        showSlide(n);
+        showSlide(Number(piece.dataset.slide));
       });
     });
 
-    /* click sull'immagine grande per chiuderla senza chiudere il libro */
     viewer.addEventListener('click', () => {
       viewer.classList.remove('visible');
       document.body.classList.remove('slide-open');
     });
 
-    /* Freccia destra/spazio: apre in sequenza le slide fino alla 10 */
     document.addEventListener('keydown', (e) => {
       if (e.code === 'Space' || e.code === 'ArrowRight') {
         e.preventDefault();
@@ -659,8 +461,7 @@
           openBook();
           return;
         }
-        const next = Math.min(lastOpenedSlide + 1, 10);
-        showSlide(next || 1);
+        showSlide(Math.min((lastOpenedSlide || 0) + 1, 10));
       }
 
       if (e.code === 'Escape') {
@@ -671,4 +472,3 @@
   </script>
 </body>
 </html>
-
