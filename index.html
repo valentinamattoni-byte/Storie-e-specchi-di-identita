@@ -387,11 +387,12 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(0,0,0,.72);
+      background: rgba(0,0,0,.28);
       opacity: 0;
       pointer-events: none;
       z-index: 9999;
-      transition: opacity .55s ease;
+      transition: opacity .25s ease;
+      padding: 8px;
     }
 
     .slide-viewer.visible {
@@ -402,27 +403,33 @@
     .slide-viewer img {
       position: relative;
       z-index: 10000;
-      max-width: 88vw;
-      max-height: 88vh;
+      width: auto;
+      max-width: 98vw;
+      max-height: 96vh;
       object-fit: contain;
       background: white;
-      padding: 10px;
-      box-shadow: 0 24px 70px rgba(0,0,0,.55);
+      padding: 4px;
+      border: 2px solid rgba(255,255,255,.92);
+      box-shadow: 0 18px 48px rgba(0,0,0,.36);
+      display: block;
+      margin: auto;
+      transform: translateY(-12px);
     }
 
     .viewer-label {
       position: fixed;
-      top: 24px;
+      top: 10px;
       left: 50%;
       transform: translateX(-50%);
-      padding: 9px 16px;
+      padding: 7px 14px;
       border-radius: 999px;
-      background: rgba(255,255,255,.88);
+      background: rgba(255,255,255,.9);
       font-weight: bold;
-      box-shadow: 0 8px 22px rgba(0,0,0,.16);
+      box-shadow: 0 6px 18px rgba(0,0,0,.14);
+      z-index: 10001;
     }
 
-    /*
+/*
       Quadrati ornamentali sullo sfondo.
       Non sono interattivi: servono solo a dare
       più presenza visiva all'explosion book.
@@ -529,6 +536,21 @@
     body.slide-open .slide-viewer {
       z-index: 9999;
     }
+
+    /* Stabilizza il click sui triangoli piccoli senza avanzamento automatico */
+    .book.open .clickable-piece {
+      pointer-events: auto;
+    }
+
+    .book.open .triangle.clickable-piece {
+      z-index: 90;
+    }
+
+    .book.open .t5,
+    .book.open .t7 {
+      z-index: 120;
+    }
+
 @media (max-width: 760px) {
       .book { --s: 105px; }
       .square span, .triangle span { font-size: 9px; }
@@ -610,11 +632,43 @@
       'slide11.jpg'
     ];
 
+    const titles = [
+      'Intro',
+      'Contesto, Criticità e Esigenze',
+      'Contesto essenziale',
+      'UDA e Obbiettivi',
+      'Metodologie e Interventi',
+      'Elaborato TIC',
+      'Esempi vicivi',
+      'Risultati attesi',
+      'Autovalutazione',
+      'Conclusioni e Prospettive',
+      'Slide finale'
+    ];
+
     let lastOpenedSlide = 0;
 
-    /* Precarica le immagini delle slide per GitHub Pages */
-    slides.forEach(src => {
+    const assets = [
+      ...slides,
+      'CAR.jpg',
+      'CCC.jpg',
+      'CROS.jpg',
+      'CG1.jpg',
+      'CACQ.jpg',
+      'carta vi.jpg',
+      'carta az.jpg',
+      'carta bs.jpg',
+      'carta ar.jpg',
+      'carta ve.jpg',
+      'carta ve c.jpg',
+      'carta rs.jpg',
+      'sfondo muro v.jpg'
+    ];
+
+    assets.forEach(src => {
       const img = new Image();
+      img.decoding = 'async';
+      img.loading = 'eager';
       img.src = src;
     });
 
@@ -635,25 +689,11 @@
 
       lastOpenedSlide = n;
       viewerImage.src = slides[index];
-      viewerLabel.textContent = `Slide ${n}`;
+      viewerImage.alt = `Slide ${n}`;
+      viewerLabel.textContent = titles[index] || `Slide ${n}`;
+
       document.body.classList.add('slide-open');
       viewer.classList.add('visible');
-
-      /*
-        Dopo la slide 11: la slide resta leggibile un momento,
-        poi il viewer sparisce, si rivede il book aperto,
-        infine il book torna chiuso come all'inizio.
-      */
-      if (n === 11) {
-        setTimeout(() => {
-          viewer.classList.remove('visible');
-          document.body.classList.remove('slide-open');
-
-          setTimeout(() => {
-            closeBook();
-          }, 850);
-        }, 2200);
-      }
     }
 
     /*
@@ -683,6 +723,12 @@
     viewer.addEventListener('click', () => {
       viewer.classList.remove('visible');
       document.body.classList.remove('slide-open');
+
+      if (lastOpenedSlide === 11) {
+        setTimeout(() => {
+          closeBook();
+        }, 450);
+      }
     });
 
     /* Freccia destra/spazio: apre in sequenza le slide fino alla 10 */
@@ -691,10 +737,7 @@
         e.preventDefault();
         if (!book.classList.contains('open')) {
           openBook();
-          return;
         }
-        const next = Math.min(lastOpenedSlide + 1, 11);
-        showSlide(next || 1);
       }
 
       if (e.code === 'Escape') {
