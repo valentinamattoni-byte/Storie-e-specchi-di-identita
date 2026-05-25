@@ -34,17 +34,17 @@
     }
 
     .book {
-      --s: min(14vw, 130px);
+      --s: min(15.5vw, 145px);
       width: calc(var(--s) * 6.2);
       height: calc(var(--s) * 6.2);
       position: relative;
       transform-style: preserve-3d;
       cursor: pointer;
-      transition: transform 1s ease;
+      transition: transform 1.25s cubic-bezier(.22,.85,.18,1), opacity .55s ease, filter .55s ease;
     }
 
     .book.open {
-      transform: scale(1.08) rotateX(4deg) rotateZ(-2deg) translateX(-2vw);
+      transform: scale(1.12) rotateX(4deg) rotateZ(-2deg) translateX(-2vw);
     }
 
     .square,
@@ -62,8 +62,9 @@
       box-shadow: 0 12px 24px rgba(0,0,0,.16);
       backface-visibility: hidden;
       transition:
-        transform 1.15s cubic-bezier(.2,.75,.15,1),
-        opacity .45s ease;
+        transform 1.25s cubic-bezier(.22,.85,.18,1),
+        opacity .55s ease,
+        filter .55s ease;
       overflow: hidden;
     }
 
@@ -92,11 +93,11 @@
       z-index: 3;
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: cover;
       object-position: center;
       display: block;
       background: white;
-      padding: 2px;
+      padding: 0;
     }
 
     .has-slide,
@@ -135,10 +136,11 @@
       Adattamento migliore per immagini verticali o fotografie di slide.
       L'immagine sfrutta più spazio interno senza deformarsi.
     */
-    .has-slide img {
+    .has-slide img,
+    .has-slide-small img {
       max-width: 100%;
       max-height: 100%;
-      transform: scale(1.02);
+      transform: scale(1.08);
       transform-origin: center;
     }
 
@@ -219,20 +221,24 @@
     */
     .triangle.has-triangle-slide {
       background: #ffffff;
-      padding: 0;
+      padding: 4px;
       overflow: hidden;
+      border: 2px solid rgba(55,35,28,.55);
+      box-shadow: inset 0 0 0 3px rgba(255,255,255,.85), 0 12px 24px rgba(0,0,0,.16);
     }
 
     .triangle.has-triangle-slide img {
       position: absolute;
-      inset: -14%;
-      width: 128%;
-      height: 128%;
+      inset: 5%;
+      width: 90%;
+      height: 90%;
       object-fit: cover;
       object-position: center;
       display: block;
       z-index: 0;
       filter: saturate(1.05) contrast(1.03);
+      border: 2px solid rgba(255,255,255,.9);
+      box-shadow: 0 3px 8px rgba(0,0,0,.20);
     }
 
     .triangle.has-triangle-slide::after {
@@ -311,6 +317,10 @@
       background-position: center;
       background-repeat: no-repeat;
       z-index: 50;
+
+      /* identico a prima + piccolo bordo bianco */
+      border: 2px solid rgba(255,255,255,.78);
+
       box-shadow: 0 22px 36px rgba(0,0,0,.24);
     }
 
@@ -346,6 +356,23 @@
       display: none !important;
     }
 
+
+    /* Bordo tipo foto incollata anche nei quadrati */
+    .has-slide,
+    .has-slide-small {
+      border: 2px solid rgba(55,35,28,.55);
+      box-shadow: inset 0 0 0 4px rgba(255,255,255,.9), 0 12px 24px rgba(0,0,0,.16);
+    }
+
+    .has-slide img,
+    .has-slide-small img {
+      inset: 5%;
+      width: 90%;
+      height: 90%;
+      border: 2px solid rgba(255,255,255,.92);
+      box-shadow: 0 3px 8px rgba(0,0,0,.20);
+    }
+
     .clickable-piece {
       cursor: pointer;
     }
@@ -364,7 +391,7 @@
       opacity: 0;
       pointer-events: none;
       z-index: 9999;
-      transition: opacity .35s ease;
+      transition: opacity .55s ease;
     }
 
     .slide-viewer.visible {
@@ -543,18 +570,18 @@
       <div class="triangle t3 has-triangle-slide clickable-piece" data-slide="5"><img src="slide5.jpg" alt="Slide 5" /><span>5</span></div>
       <div class="triangle t4 has-triangle-slide clickable-piece" data-slide="7"><img src="slide7.jpg" alt="Slide 7" /><span>7</span></div>
 
-      <div class="triangle t5 clickable-piece" data-slide="10"><span>10</span></div>
-      <div class="triangle t6"><span></span></div>
+      <div class="triangle t5 has-triangle-slide clickable-piece" data-slide="10"><img src="slide10.jpg" alt="Slide 10" /><span></span></div>
+      <div class="triangle t6 has-triangle-slide clickable-piece" data-slide="11"><img src="slide11.jpg" alt="Slide 11" /><span></span></div>
 
-      <div class="triangle t7 clickable-piece" data-slide="9"><span>9</span></div>
+      <div class="triangle t7 has-triangle-slide clickable-piece" data-slide="9"><img src="slide9.jpg" alt="Slide 9" /><span></span></div>
 
-      <div class="triangle t8"><span></span></div>
+      <div class="triangle t8 has-triangle-slide"><img src="CAR.jpg" alt="t8" /><span></span></div>
 
-      <div class="triangle t9"><span></span></div>
-      <div class="triangle t10"><span></span></div>
+      <div class="triangle t9 has-triangle-slide"><img src="CCC.jpg" alt="t9" /><span></span></div>
+      <div class="triangle t10 has-triangle-slide"><img src="CROS.jpg" alt="t10" /><span></span></div>
 
-      <div class="triangle t11"><span></span></div>
-      <div class="triangle t12"><span></span></div>
+      <div class="triangle t11 has-triangle-slide"><img src="CG1.jpg" alt="t11" /><span></span></div>
+      <div class="triangle t12 has-triangle-slide"><img src="CACQ.jpg" alt="t12" /><span></span></div>
     </section>
 
     <div class="slide-viewer" id="slideViewer" aria-hidden="true">
@@ -579,7 +606,8 @@
       'slide7.jpg',
       'slide8.jpg',
       'slide9.jpg',
-      'slide10.jpg'
+      'slide10.jpg',
+      'slide11.jpg'
     ];
 
     let lastOpenedSlide = 0;
@@ -610,6 +638,22 @@
       viewerLabel.textContent = `Slide ${n}`;
       document.body.classList.add('slide-open');
       viewer.classList.add('visible');
+
+      /*
+        Dopo la slide 11: la slide resta leggibile un momento,
+        poi il viewer sparisce, si rivede il book aperto,
+        infine il book torna chiuso come all'inizio.
+      */
+      if (n === 11) {
+        setTimeout(() => {
+          viewer.classList.remove('visible');
+          document.body.classList.remove('slide-open');
+
+          setTimeout(() => {
+            closeBook();
+          }, 850);
+        }, 2200);
+      }
     }
 
     /*
@@ -624,7 +668,7 @@
 
     /*
       Cliccando sui 4 quadrati e sui 6 triangoli assegnati,
-      si visualizzano le slide dalla 1 alla 10.
+      si visualizzano le slide dalla 1 alla 11.
     */
     pieces.forEach(piece => {
       piece.addEventListener('click', (e) => {
@@ -649,7 +693,7 @@
           openBook();
           return;
         }
-        const next = Math.min(lastOpenedSlide + 1, 10);
+        const next = Math.min(lastOpenedSlide + 1, 11);
         showSlide(next || 1);
       }
 
