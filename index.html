@@ -565,15 +565,7 @@
       opacity: .28;
       filter: blur(1px) brightness(.75);
     }
-
-    body.slide-open .book {
-      z-index: 10;
-      opacity: .28;
-      filter: brightness(.75);
-      pointer-events: none;
-    }
-
-    body.slide-open .slide-viewer {
+body.slide-open .slide-viewer {
       z-index: 9999;
     }
 
@@ -617,6 +609,54 @@
     .has-slide,
     .has-slide-small {
       background-color: #ffffff;
+    }
+
+
+    /* Pop-up / pop-in: la slide parte dal suo quadrato/triangolo e rientra lì */
+    .flying-slide {
+      position: fixed;
+      z-index: 10000;
+      background: #ffffff;
+      padding: 6px;
+      border: 3px solid rgba(255,255,255,.94);
+      box-shadow: 0 24px 70px rgba(0,0,0,.48);
+      overflow: hidden;
+      pointer-events: none;
+      opacity: 0;
+      transition:
+        left .58s cubic-bezier(.22,.85,.18,1),
+        top .58s cubic-bezier(.22,.85,.18,1),
+        width .58s cubic-bezier(.22,.85,.18,1),
+        height .58s cubic-bezier(.22,.85,.18,1),
+        opacity .18s ease;
+    }
+
+    .flying-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #ffffff;
+      display: block;
+    }
+
+    .flying-title {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10001;
+      padding: 7px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.92);
+      font-weight: bold;
+      box-shadow: 0 6px 18px rgba(0,0,0,.14);
+      opacity: 0;
+      transition: opacity .18s ease;
+      pointer-events: none;
+    }
+
+    .flying-title.visible {
+      opacity: 1;
     }
 
 @media (max-width: 760px) {
@@ -681,10 +721,6 @@
   </main>
 <script>
     const book = document.getElementById('book');
-    const viewer = document.getElementById('slideViewer');
-    const viewerImage = document.getElementById('viewerImage');
-    const viewerLabel = document.getElementById('viewerLabel');
-    const pieces = document.querySelectorAll('.clickable-piece');
 
     const slides = [
       'slide1.jpg',
@@ -714,8 +750,6 @@
       'Ringraziamenti'
     ];
 
-    let lastOpenedSlide = 0;
-
     const assets = [
       ...slides,
       'CAR.jpg',
@@ -738,11 +772,37 @@
       img.decoding = 'async';
       img.loading = 'eager';
       img.src = src;
-      if (img.decode) {
-        img.decode().catch(() => {});
-      }
+      if (img.decode) img.decode().catch(() => {});
     });
 
+    let activeCard = null;
+    let activeTitle = null;
+    let activeStartRect = null;
+    let activeSlideNumber = null;
+    let isAnimating = false;
+    let viewedSlides = new Set();
+
+    function wait(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function getPieceForSlide(slideNumber) {
+      return document.querySelector(`[data-slide="${slideNumber}"]`) || book;
+    }
+
+    function getTargetRect() {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const w = Math.min(vw * 0.90, 1040);
+      const h = Math.min(vh * 0.86, 680);
+
+      return {
+        left: (vw - w) / 2,
+        top: (vh - h) / 2,
+        width: w,
+        height: h
+      };
+    }
 
     function openBook() {
       requestAnimationFrame(() => {
@@ -751,71 +811,189 @@
     }
 
     function closeBook() {
-      viewer.classList.remove('visible');
+      document.body.classList.remove('slide-open');
       book.classList.remove('open');
-      lastOpenedSlide = 0;
+      activeCard?.remove();
+      activeTitle?.remove();
+      activeCard = null;
+      activeTitle = null;
+      activeStartRect = null;
+      activeSlideNumber = null;
+      isAnimating = false;
+      viewedSlides.clear();
     }
 
-    function showSlide(n) {
-      const index = n - 1;
-      if (!slides[index]) return;
+    async function openSlide(slideNumber) {
+      const index = slideNumber - 1;
+      const piece = getPieceForSlide(slideNumber);
+      const start = piece.getBoundingClientRect();
+      const target = getTargetRect();
 
-      lastOpenedSlide = n;
-      viewerImage.src = slides[index];
-      viewerImage.alt = `Slide ${n}`;
-      viewerLabel.textContent = titles[index] || `Slide ${n}`;
-
+      activeStartRect = start;
+      activeSlideNumber = slideNumber;
       document.body.classList.add('slide-open');
-      viewer.classList.add('visible');
+
+      const title = document.createElement('div');
+      title.className = 'flying-title';
+      title.textContent = titles[index] || `Slide ${slideNumber}`;
+      document.body.appendChild(title);
+
+      const card = document.createElement('div');
+      card.className = 'flying-slide';
+      card.style.left = `${start.left}px`;
+      card.style.top = `${start.top}px`;
+      card.style.width = `${Math.max(start.width, 30)}px`;
+      card.style.height = `${Math.max(start.height, 30)}px`;
+
+      const img = document.createElement('img');
+      img.src = slides[index];
+      img.alt = titles[index] || `Slide ${slideNumber}`;
+      card.appendChild(img);
+
+      document.body.appendChild(card);
+
+      activeCard = card;
+      activeTitle = title;
+
+      await wait(30);
+
+      title.classList.add('visible');
+      card.style.opacity = '1';
+      card.style.left = `${target.left}px`;
+      card.style.top = `${target.top}px`;
+      card.style.width = `${target.width}px`;
+      card.style.height = `${target.height}px`;
+    }
+
+    async function closeSlide() {
+      if (!activeCard || !activeStartRect) return;
+
+      activeCard.style.left = `${activeStartRect.left}px`;
+      activeCard.style.top = `${activeStartRect.top}px`;
+      activeCard.style.width = `${Math.max(activeStartRect.width, 30)}px`;
+      activeCard.style.height = `${Math.max(activeStartRect.height, 30)}px`;
+      activeCard.style.opacity = '0';
+      activeTitle?.classList.remove('visible');
+
+      await wait(620);
+
+      if (activeSlideNumber) {
+        viewedSlides.add(activeSlideNumber);
+      }
+
+      activeCard.remove();
+      activeTitle?.remove();
+      activeCard = null;
+      activeTitle = null;
+      activeStartRect = null;
+      activeSlideNumber = null;
+      document.body.classList.remove('slide-open');
+    }
+
+    async function toggleSlide(slideNumber) {
+      if (isAnimating) return;
+      isAnimating = true;
+
+      if (!book.classList.contains('open')) {
+        openBook();
+        await wait(520);
+      }
+
+      if (activeCard) {
+        await closeSlide();
+      } else {
+        await openSlide(slideNumber);
+      }
+
+      isAnimating = false;
     }
 
     /*
-      Primo click sulla copertina: apre l'explosion book.
-      Poi il libro resta aperto.
+      Click sulla copertina:
+      - se il book è chiuso, lo apre;
+      - se tutte le 11 slide sono state aperte e richiuse, lo chiude.
     */
-    book.addEventListener('click', (e) => {
+    book.addEventListener('click', async (e) => {
+      if (e.target.closest('.clickable-piece')) return;
+      if (isAnimating) return;
+
       if (!book.classList.contains('open')) {
+        isAnimating = true;
         openBook();
+        await wait(520);
+        isAnimating = false;
+        return;
+      }
+
+      if (!activeCard && viewedSlides.size >= 11) {
+        closeBook();
       }
     });
 
     /*
-      Cliccando sui 4 quadrati e sui 6 triangoli assegnati,
-      si visualizzano le slide dalla 1 alla 11.
+      Click sui pezzi del book:
+      - clicchi il quadrato/triangolo della slide;
+      - la slide esce da quel pezzo;
+      - riclicchi sulla slide grande per farla rientrare nello stesso pezzo.
     */
-    pieces.forEach(piece => {
+    document.querySelectorAll('.clickable-piece').forEach(piece => {
       piece.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (!book.classList.contains('open')) openBook();
         const n = Number(piece.dataset.slide);
-        showSlide(n);
+        if (n) toggleSlide(n);
       });
     });
 
-    /* click sull'immagine grande per chiuderla senza chiudere il libro */
-    viewer.addEventListener('click', () => {
-      viewer.classList.remove('visible');
-      document.body.classList.remove('slide-open');
-
-      if (lastOpenedSlide === 11) {
-        setTimeout(() => {
-          closeBook();
-        }, 450);
+    /*
+      Click sulla slide aperta: rientra nel suo quadrato/triangolo.
+    */
+    document.addEventListener('click', (e) => {
+      if (!activeCard || isAnimating) return;
+      if (e.target.closest('.flying-slide')) {
+        e.stopPropagation();
+        isAnimating = true;
+        closeSlide().then(() => {
+          isAnimating = false;
+        });
       }
     });
 
-    /* Freccia destra/spazio: apre il book se è chiuso */
-    document.addEventListener('keydown', (e) => {
-      if (e.code === 'Space' || e.code === 'ArrowRight') {
-        e.preventDefault();
-        if (!book.classList.contains('open')) {
-          openBook();
+
+    /*
+      Click finale di sicurezza:
+      dopo che tutte le 11 slide sono state aperte e richiuse,
+      un click su qualunque punto libero richiude l'explosion book.
+    */
+    document.addEventListener('click', (e) => {
+      if (isAnimating) return;
+      if (activeCard) return;
+      if (!book.classList.contains('open')) return;
+      if (e.target.closest('.clickable-piece')) return;
+
+      if (viewedSlides.size >= 11) {
+        closeBook();
+      }
+    });
+
+    document.addEventListener('keydown', async (e) => {
+      if (e.code === 'Escape') {
+        if (activeCard) {
+          isAnimating = true;
+          await closeSlide();
+          isAnimating = false;
+        } else {
+          closeBook();
         }
       }
 
-      if (e.code === 'Escape') {
-        viewer.classList.remove('visible');
-        document.body.classList.remove('slide-open');
+      if (e.code === 'Space' || e.code === 'ArrowRight') {
+        e.preventDefault();
+        if (!book.classList.contains('open')) {
+          isAnimating = true;
+          openBook();
+          await wait(520);
+          isAnimating = false;
+        }
       }
     });
   </script>
