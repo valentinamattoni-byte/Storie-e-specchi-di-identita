@@ -4,6 +4,35 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Explosion Book - 4 quadrati + 12 triangoli</title>
+
+  <!-- Preload immagini principali per GitHub Pages -->
+  <link rel="preload" as="image" href="sfondo muro v.jpg">
+  <link rel="preload" as="image" href="carta vi.jpg">
+  <link rel="preload" as="image" href="carta az.jpg">
+  <link rel="preload" as="image" href="carta bs.jpg">
+  <link rel="preload" as="image" href="carta ar.jpg">
+  <link rel="preload" as="image" href="carta ve.jpg">
+  <link rel="preload" as="image" href="carta ve c.jpg">
+  <link rel="preload" as="image" href="carta rs.jpg">
+  <link rel="preload" as="image" href="slide1.jpg">
+  <link rel="preload" as="image" href="slide2.jpg">
+  <link rel="preload" as="image" href="slide3.jpg">
+  <link rel="preload" as="image" href="slide4.jpg">
+  <link rel="preload" as="image" href="slide5.jpg">
+  <link rel="preload" as="image" href="slide6.jpg">
+  <link rel="preload" as="image" href="slide7.jpg">
+  <link rel="preload" as="image" href="slide8.jpg">
+  <link rel="preload" as="image" href="slide9.jpg">
+  <link rel="preload" as="image" href="slide10.jpg">
+  <link rel="preload" as="image" href="slide11.jpg">
+
+  <link rel="preload" as="image" href="CAR.jpg">
+  <link rel="preload" as="image" href="CCC.jpg">
+  <link rel="preload" as="image" href="CROS.jpg">
+  <link rel="preload" as="image" href="CACQ.jpg">
+  <link rel="preload" as="image" href="CG2.jpg">
+
+
   <style>
     * { box-sizing: border-box; }
 
@@ -40,7 +69,7 @@
       position: relative;
       transform-style: preserve-3d;
       cursor: pointer;
-      transition: transform 1.25s cubic-bezier(.22,.85,.18,1), opacity .55s ease, filter .55s ease;
+      transition: transform .34s cubic-bezier(.22,.85,.18,1), opacity .16s ease, filter .16s ease;
     }
 
     .book.open {
@@ -62,9 +91,9 @@
       box-shadow: 0 12px 24px rgba(0,0,0,.16);
       backface-visibility: hidden;
       transition:
-        transform 1.25s cubic-bezier(.22,.85,.18,1),
-        opacity .55s ease,
-        filter .55s ease;
+        transform .34s cubic-bezier(.22,.85,.18,1),
+        opacity .16s ease,
+        filter .16s ease;
       overflow: hidden;
     }
 
@@ -204,6 +233,7 @@
 
     .book.open .triangle {
       opacity: 1;
+      transition-delay: 0s;
     }
 
     /*
@@ -401,7 +431,7 @@
       opacity: 0;
       pointer-events: none;
       z-index: 9999;
-      transition: opacity .25s ease;
+      transition: opacity .16s ease;
       padding: 8px;
     }
 
@@ -561,6 +591,34 @@
       z-index: 120;
     }
 
+
+    /* Performance: forza compositing e riduce ritardi di rendering */
+    .book,
+    .square,
+    .triangle,
+    .cover,
+    .decor-square,
+    .slide-viewer img {
+      will-change: transform, opacity;
+      transform-style: preserve-3d;
+    }
+
+    .decor-square,
+    .square img,
+    .triangle img,
+    .cover {
+      image-rendering: auto;
+    }
+
+
+    /* GitHub Pages: limita ritardi visivi mentre le immagini vengono scaricate */
+    .decor-square,
+    .triangle.has-triangle-slide,
+    .has-slide,
+    .has-slide-small {
+      background-color: #ffffff;
+    }
+
 @media (max-width: 760px) {
       .book { --s: 105px; }
       .square span, .triangle span { font-size: 9px; }
@@ -581,43 +639,43 @@
       <div class="cover"><strong>Storie<br>uniche</strong></div>
 
       <div class="square q1 has-slide-small clickable-piece" data-slide="1">
-        <img src="slide1.jpg" alt="Slide 1" />
+        <img fetchpriority="high" decoding="async" loading="eager" src="slide1.jpg" alt="Slide 1" />
       </div>
 
       <div class="square q2 has-slide-small clickable-piece" data-slide="2">
-        <img src="slide2.jpg" alt="Slide 2" />
+        <img fetchpriority="high" decoding="async" loading="eager" src="slide2.jpg" alt="Slide 2" />
       </div>
 
       <div class="square q3 has-slide clickable-piece" data-slide="3">
-        <img src="slide3.jpg" alt="Slide 3" />
+        <img fetchpriority="high" decoding="async" loading="eager" src="slide3.jpg" alt="Slide 3" />
       </div>
 
       <div class="square q4 has-slide-small clickable-piece" data-slide="4">
-        <img src="slide4.jpg" alt="Slide 4" />
+        <img fetchpriority="high" decoding="async" loading="eager" src="slide4.jpg" alt="Slide 4" />
       </div>
 
-      <div class="triangle t1 has-triangle-slide clickable-piece" data-slide="6"><img src="slide6.jpg" alt="Slide 6" /><span>6</span></div>
-      <div class="triangle t2 has-triangle-slide clickable-piece" data-slide="8"><img src="slide8.jpg" alt="Slide 8" /><span>8</span></div>
+      <div class="triangle t1 has-triangle-slide clickable-piece" data-slide="6"><img fetchpriority="high" decoding="async" loading="eager" src="slide6.jpg" alt="Slide 6" /><span>6</span></div>
+      <div class="triangle t2 has-triangle-slide clickable-piece" data-slide="8"><img fetchpriority="high" decoding="async" loading="eager" src="slide8.jpg" alt="Slide 8" /><span>8</span></div>
 
-      <div class="triangle t3 has-triangle-slide clickable-piece" data-slide="5"><img src="slide5.jpg" alt="Slide 5" /><span>5</span></div>
-      <div class="triangle t4 has-triangle-slide clickable-piece" data-slide="7"><img src="slide7.jpg" alt="Slide 7" /><span>7</span></div>
+      <div class="triangle t3 has-triangle-slide clickable-piece" data-slide="5"><img fetchpriority="high" decoding="async" loading="eager" src="slide5.jpg" alt="Slide 5" /><span>5</span></div>
+      <div class="triangle t4 has-triangle-slide clickable-piece" data-slide="7"><img fetchpriority="high" decoding="async" loading="eager" src="slide7.jpg" alt="Slide 7" /><span>7</span></div>
 
-      <div class="triangle t5 has-triangle-slide clickable-piece" data-slide="10"><img src="slide10.jpg" alt="Slide 10" /><span></span></div>
-      <div class="triangle t6 has-triangle-slide clickable-piece" data-slide="11"><img src="slide11.jpg" alt="Slide 11" /><span></span></div>
+      <div class="triangle t5 has-triangle-slide clickable-piece" data-slide="10"><img fetchpriority="high" decoding="async" loading="eager" src="slide10.jpg" alt="Slide 10" /><span></span></div>
+      <div class="triangle t6 has-triangle-slide clickable-piece" data-slide="11"><img fetchpriority="high" decoding="async" loading="eager" src="slide11.jpg" alt="Slide 11" /><span></span></div>
 
-      <div class="triangle t7 has-triangle-slide clickable-piece" data-slide="9"><img src="slide9.jpg" alt="Slide 9" /><span></span></div>
+      <div class="triangle t7 has-triangle-slide clickable-piece" data-slide="9"><img fetchpriority="high" decoding="async" loading="eager" src="slide9.jpg" alt="Slide 9" /><span></span></div>
 
-      <div class="triangle t8 has-triangle-slide"><img src="CAR.jpg" alt="t8" /><span></span></div>
+      <div class="triangle t8 has-triangle-slide"><img fetchpriority="high" decoding="async" loading="eager" src="CAR.jpg" alt="t8" /><span></span></div>
 
-      <div class="triangle t9 has-triangle-slide"><img src="CCC.jpg" alt="t9" /><span></span></div>
-      <div class="triangle t10 has-triangle-slide"><img src="CROS.jpg" alt="t10" /><span></span></div>
+      <div class="triangle t9 has-triangle-slide"><img fetchpriority="high" decoding="async" loading="eager" src="CCC.jpg" alt="t9" /><span></span></div>
+      <div class="triangle t10 has-triangle-slide"><img fetchpriority="high" decoding="async" loading="eager" src="CROS.jpg" alt="t10" /><span></span></div>
 
-      <div class="triangle t11 has-triangle-slide"><img src="CG1.jpg" alt="t11" /><span></span></div>
-      <div class="triangle t12 has-triangle-slide"><img src="CACQ.jpg" alt="t12" /><span></span></div>
+      <div class="triangle t11 has-triangle-slide"><img fetchpriority="high" decoding="async" loading="eager" src="CACQ.jpg" alt="t11" /><span></span></div>
+      <div class="triangle t12 has-triangle-slide"><img fetchpriority="high" decoding="async" loading="eager" src="CG2.jpg" alt="t12" /><span></span></div>
     </section>
 
     <div class="slide-viewer" id="slideViewer" aria-hidden="true">
-      <img id="viewerImage" src="slide1.jpg" alt="Slide ingrandita" />
+      <img fetchpriority="high" decoding="async" loading="eager" id="viewerImage" src="slide1.jpg" alt="Slide ingrandita" />
       <div class="viewer-label" id="viewerLabel">Slide 1</div>
     </div>
   </main>
@@ -663,8 +721,8 @@
       'CAR.jpg',
       'CCC.jpg',
       'CROS.jpg',
-      'CG1.jpg',
       'CACQ.jpg',
+      'CG2.jpg',
       'carta vi.jpg',
       'carta az.jpg',
       'carta bs.jpg',
@@ -680,11 +738,16 @@
       img.decoding = 'async';
       img.loading = 'eager';
       img.src = src;
+      if (img.decode) {
+        img.decode().catch(() => {});
+      }
     });
 
 
     function openBook() {
-      book.classList.add('open');
+      requestAnimationFrame(() => {
+        book.classList.add('open');
+      });
     }
 
     function closeBook() {
@@ -741,7 +804,7 @@
       }
     });
 
-    /* Freccia destra/spazio: apre in sequenza le slide fino alla 10 */
+    /* Freccia destra/spazio: apre il book se è chiuso */
     document.addEventListener('keydown', (e) => {
       if (e.code === 'Space' || e.code === 'ArrowRight') {
         e.preventDefault();
