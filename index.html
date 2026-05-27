@@ -701,11 +701,11 @@ body.slide-open .slide-viewer {
       <div class="triangle t4 has-triangle-slide clickable-piece" data-slide="7"><img fetchpriority="high" decoding="async" loading="eager" src="slide7.jpg" alt="Slide 7" /><span>7</span></div>
 
       <div class="triangle t5 has-triangle-slide clickable-piece" data-slide="10"><img fetchpriority="high" decoding="async" loading="eager" src="slide10.jpg" alt="Slide 10" /><span></span></div>
-      <div class="triangle t6 has-triangle-slide clickable-piece" data-slide="11"><img fetchpriority="high" decoding="async" loading="eager" src="slide11.jpg" alt="Slide 11" /><span></span></div>
+      <div class="triangle t6 has-triangle-slide"><img fetchpriority="high" decoding="async" loading="eager" src="CAR.jpg" alt="t6" /><span></span></div>
 
       <div class="triangle t7 has-triangle-slide clickable-piece" data-slide="9"><img fetchpriority="high" decoding="async" loading="eager" src="slide9.jpg" alt="Slide 9" /><span></span></div>
 
-      <div class="triangle t8 has-triangle-slide"><img fetchpriority="high" decoding="async" loading="eager" src="CAR.jpg" alt="t8" /><span></span></div>
+      <div class="triangle t8 has-triangle-slide clickable-piece" data-slide="11"><img fetchpriority="high" decoding="async" loading="eager" src="slide11.jpg" alt="Slide 11" /><span></span></div>
 
       <div class="triangle t9 has-triangle-slide"><img fetchpriority="high" decoding="async" loading="eager" src="CCC.jpg" alt="t9" /><span></span></div>
       <div class="triangle t10 has-triangle-slide"><img fetchpriority="high" decoding="async" loading="eager" src="CROS.jpg" alt="t10" /><span></span></div>
@@ -781,6 +781,7 @@ body.slide-open .slide-viewer {
     let activeSlideNumber = null;
     let isAnimating = false;
     let viewedSlides = new Set();
+    let readyToCloseBook = false;
 
     function wait(ms) {
       return new Promise(resolve => setTimeout(resolve, ms));
@@ -821,6 +822,7 @@ body.slide-open .slide-viewer {
       activeSlideNumber = null;
       isAnimating = false;
       viewedSlides.clear();
+      readyToCloseBook = false;
     }
 
     async function openSlide(slideNumber) {
@@ -879,6 +881,12 @@ body.slide-open .slide-viewer {
 
       if (activeSlideNumber) {
         viewedSlides.add(activeSlideNumber);
+
+        // Dopo che la slide 11 / Ringraziamenti rientra,
+        // il click successivo richiude il book.
+        if (activeSlideNumber === 11) {
+          readyToCloseBook = true;
+        }
       }
 
       activeCard.remove();
@@ -925,7 +933,7 @@ body.slide-open .slide-viewer {
         return;
       }
 
-      if (!activeCard && viewedSlides.size >= 11) {
+      if (!activeCard && readyToCloseBook) {
         closeBook();
       }
     });
@@ -970,7 +978,7 @@ body.slide-open .slide-viewer {
       if (!book.classList.contains('open')) return;
       if (e.target.closest('.clickable-piece')) return;
 
-      if (viewedSlides.size >= 11) {
+      if (readyToCloseBook) {
         closeBook();
       }
     });
