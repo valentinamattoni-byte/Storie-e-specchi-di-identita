@@ -641,6 +641,7 @@ body.slide-open .slide-viewer {
 
     .flying-title {
       position: fixed;
+      pointer-events: auto;
       top: 10px;
       left: 50%;
       transform: translateX(-50%);
@@ -657,6 +658,17 @@ body.slide-open .slide-viewer {
 
     .flying-title.visible {
       opacity: 1;
+    }
+
+    .flying-title,
+    .flying-title a {
+      pointer-events: auto !important;
+    }
+
+    .flying-title a {
+      color: #0b57d0;
+      text-decoration: none;
+      font-weight: bold;
     }
 
 @media (max-width: 760px) {
@@ -837,8 +849,23 @@ body.slide-open .slide-viewer {
 
       const title = document.createElement('div');
       title.className = 'flying-title';
-      title.textContent = titles[index] || `Slide ${slideNumber}`;
+
+      if (slideNumber === 7) {
+        title.innerHTML = 'Esempi visivi • <a id="padletLink" href="https://padlet.com/vm333/storie-uniche-specchi-di-identita-87i47gr8hxw1m7rg" target="_blank" rel="noopener noreferrer">Apri Padlet</a>';
+      } else {
+        title.textContent = titles[index] || `Slide ${slideNumber}`;
+      }
+
       document.body.appendChild(title);
+
+      if (slideNumber === 7) {
+        const padletLink = document.getElementById('padletLink');
+        if (padletLink) {
+          padletLink.addEventListener('click', (event) => {
+            event.stopPropagation();
+          });
+        }
+      }
 
       const card = document.createElement('div');
       card.className = 'flying-slide';
